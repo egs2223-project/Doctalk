@@ -1,0 +1,18 @@
+[submodule "EGS-Backend"]
+	path = EGS-Backend
+	url = git@github.com:Immodicus/EGS-Backend.git
+[submodule "AppointmentService"]
+	path = AppointmentService
+	url = git@github.com:Immodicus/AppointmentService.git
+[submodule "frontend"]
+	path = frontend
+	url = git@github.com:egs2223-project/frontend.git
+[submodule "WebRTC"]
+	path = WebRTC
+	url = git@github.com:egs2223-project/WebRTC.git
+[submodule "authentication-service"]
+	path = authentication-service
+	url = git@github.com:egs2223-project/authentication-service.git
+[submodule "notification-service"]
+	path = notification-service
+	url = git@github.com:egs2223-project/notification-service.git
