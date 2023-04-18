@@ -41,6 +41,8 @@ services:
       
       - DATABASE_CONNECTION_STRING=Server=backend-db;User=sa;Password=Password1;TrustServerCertificate=True
       - APPOINTMENT_SERVICE_BASE_URL=http://appointment_service:5186/v1
+      - NOTIFICATION_SERVICE_BASE_URL=http://notification_service:4000/
+      - AUTH_SERVICE_BASE_URL=http://localhost:5000
     ports:
       - "7000:7000"
       - "5285:5285"
@@ -54,7 +56,8 @@ services:
         ipv4_address: 10.0.2.2
       backend-appointment-internal:
         ipv4_address: 10.0.3.2
-
+      notification-backend-internal:
+        ipv4_address: 10.0.4.2
   backend-db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
@@ -66,6 +69,21 @@ services:
     networks:
       backend-db-internal:
         ipv4_address: 10.0.2.3
+  notification_service:
+    build:
+      dockerfile: notification-service/Dockerfile.notify
+    ports:
+      - "4000:4000"
+    networks:
+      notification-backend-internal:
+        ipv4_address: 10.0.4.3
+  authentication_service:
+    build:
+      dockerfile: authentication-service/Dockerfile.auth
+    ports:
+      - "5000:5000"
+    networks:
+      default:
 networks:
   appointment-db-internal:
     internal: true
@@ -88,3 +106,10 @@ networks:
       driver: default
       config:
         - subnet: "10.0.3.0/24"
+  notification-backend-internal:
+    internal: true
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "10.0.4.0/24"
