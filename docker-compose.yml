@@ -44,7 +44,7 @@ services:
       
       - DATABASE_CONNECTION_STRING=Server=backend-db;User=sa;Password=Password1;TrustServerCertificate=True
       - APPOINTMENT_SERVICE_BASE_URL=http://appointment_service:5186/v1
-      - NOTIFICATION_SERVICE_BASE_URL=http://notification_service:4000/
+      - NOTIFICATION_SERVICE_BASE_URL=http://10.0.4.3:3030/v1
       - AUTH_SERVICE_BASE_URL=http://localhost:5000
     ports:
       - "7000:7000"
@@ -77,9 +77,13 @@ services:
     restart: on-failure
     build:
       dockerfile: notification-service/Dockerfile.notify
+    environment:
+      - BIND_PORT=3030
+      - BIND_ADDR=10.0.4.3
     ports:
-      - "4000:4000"
+      - "3030:3030"
     networks:
+      default:
       notification-backend-internal:
         ipv4_address: 10.0.4.3
   authentication_service:
