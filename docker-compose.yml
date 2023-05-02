@@ -94,6 +94,14 @@ services:
       - "5000:5000"
     networks:
       default:
+  frontend:
+    restart: on-failure
+    build:
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "3000:3000"
+    networks:
+      default:
 networks:
   appointment-db-internal:
     internal: true
