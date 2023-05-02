@@ -46,6 +46,7 @@ services:
       - APPOINTMENT_SERVICE_BASE_URL=http://appointment_service:5186/v1
       - NOTIFICATION_SERVICE_BASE_URL=http://10.0.4.3:3030/v1
       - AUTH_SERVICE_BASE_URL=http://localhost:5000
+      - WEBRTC_SERVICE_BASE_URL=http://10.0.5.3:3300
     ports:
       - "7000:7000"
       - "5285:5285"
@@ -61,6 +62,8 @@ services:
         ipv4_address: 10.0.3.2
       notification-backend-internal:
         ipv4_address: 10.0.4.2
+      backend-webrtc-internal:
+        ipv4_address: 10.0.5.2
   backend-db:
     restart: on-failure
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -108,12 +111,18 @@ services:
        dockerfile: WebRTC/Dockerfile
     ports: 
        - "3300:3300"
+    networks:
+      backend-webrtc-internal:
+        ipv4_address: 10.0.5.3
+      default:
   peerjs:
     restart: on-failure
     build:
        dockerfile: peerJS/Dockerfile
     ports: 
-      - "3001:3001"       
+      - "3001:3001" 
+    networks:
+      default:
 networks:
   appointment-db-internal:
     internal: true
@@ -143,3 +152,10 @@ networks:
       driver: default
       config:
         - subnet: "10.0.4.0/24"
+  backend-webrtc-internal:
+    internal: true
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "10.0.5.0/24"
