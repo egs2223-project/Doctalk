@@ -103,22 +103,17 @@ services:
     networks:
       default:
   webrtc:
-  	restart: on-failure
-  	build:
-  	  dockerfile: WebRTC/Dockerfile
-  	ports: 
-  	  - "3300:3300"
-  	network:
-  	  default:
-   peerJS:
-  	restart: on-failure
-  	build:
-  	  dockerfile: peerJS/Dockerfile
-  	ports: 
-  	  - "3001:3001"
-  	network:
-  	  default:
-  	          
+    restart: on-failure
+    build:
+       dockerfile: WebRTC/Dockerfile
+    ports: 
+       - "3300:3300"
+  peerjs:
+    restart: on-failure
+    build:
+       dockerfile: peerJS/Dockerfile
+    ports: 
+      - "3001:3001"       
 networks:
   appointment-db-internal:
     internal: true
