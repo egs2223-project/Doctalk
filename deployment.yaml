@@ -1,0 +1,141 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appointments-deployment
+  namespace: egs-doctalk
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: appointments
+  template:
+    metadata:
+      labels:
+        app: appointments
+    spec:
+      containers:
+      - name: appointments
+        image: registry.deti:5000/egs-doctalk/appointment_service:v1
+        env:
+        - name: DOTNET_ENVIRONMENT
+          value: "Development"
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Development"
+        - name: ASPNETCORE_URLS
+          value: "http://+:5186"
+        - name: DATABASE_CONNECTION_STRING
+          value: "Server=localhost;User=sa;Password=Password1;TrustServerCertificate=True"
+        ports:
+        - containerPort: 5186
+      - name: appointments-db
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+        - name: SA_PASSWORD
+          value: "Password1"
+        - name: ACCEPT_EULA
+          value: "Y"
+        - name: MSSQL_PID
+          value: "Developer"
+        ports:
+        - containerPort: 1433
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  namespace: egs-doctalk
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: registry.deti:5000/egs-doctalk/backend:v1
+        env:
+        - name: DOTNET_ENVIRONMENT
+          value: "Development"
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Development"
+        - name: ASPNETCORE_URLS
+          value: "http://+:5285"
+        - name: DATABASE_CONNECTION_STRING
+          value: "Server=localhost;User=sa;Password=Password1;TrustServerCertificate=True"
+        - name: APPOINTMENT_SERVICE_BASE_URL
+          value: "http://appointments-service:80/v1"
+        ports:
+        - containerPort: 5285
+      - name: backend-db
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+        - name: SA_PASSWORD
+          value: "Password1"
+        - name: ACCEPT_EULA
+          value: "Y"
+        - name: MSSQL_PID
+          value: "Developer"
+        ports:
+        - containerPort: 1433
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: appointments-service
+  namespace: egs-doctalk
+spec:
+  ports:
+  - port: 80
+    targetPort: 5186
+  selector:
+    app: appointments
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: egs-doctalk
+spec:
+  ports:
+  - port: 80
+    targetPort: 5285
+  selector:
+    app: backend
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: appointments-k3s
+  namespace: egs-doctalk
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/frontend-entry-points: http,https
+    traefik.ingress.kubernetes.io/redirect-entry-point: https
+    traefik.ingress.kubernetes.io/redirect-permanent: "true"
+spec:
+  rules:
+  # - host: app-egs-doctalk-appointments.deti
+  #   http:
+  #     paths:
+  #     - path: /
+  #       pathType: Prefix
+  #       backend:
+  #         service:
+  #           name: appointments-service
+  #           port: 
+  #             number: 80
+  - host: app-egs-doctalk-backend.deti
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port: 
+              number: 80
