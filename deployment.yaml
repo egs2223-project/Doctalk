@@ -125,6 +125,27 @@ spec:
         ports:
         - containerPort: 3001
 ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: egs-doctalk
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: registry.deti:5000/egs-doctalk/frontend:v1
+        ports:
+        - containerPort: 3000
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -172,6 +193,18 @@ spec:
     targetPort: 3001
   selector:
     app: peerjs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: egs-doctalk
+spec:
+  ports:
+  - port: 80
+    targetPort: 3000
+  selector:
+    app: frontend
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
