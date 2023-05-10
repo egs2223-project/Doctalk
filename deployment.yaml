@@ -83,6 +83,48 @@ spec:
         ports:
         - containerPort: 1433
 ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webrtc-deployment
+  namespace: egs-doctalk
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webrtc
+  template:
+    metadata:
+      labels:
+        app: webrtc
+    spec:
+      containers:
+      - name: webrtc
+        image: registry.deti:5000/egs-doctalk/webrtc:v1
+        ports:
+        - containerPort: 3300
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: peerjs-deployment
+  namespace: egs-doctalk
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: peerjs
+  template:
+    metadata:
+      labels:
+        app: peerjs
+    spec:
+      containers:
+      - name: peerjs
+        image: registry.deti:5000/egs-doctalk/peerjs:v1
+        ports:
+        - containerPort: 3001
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -106,6 +148,30 @@ spec:
     targetPort: 5285
   selector:
     app: backend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webrtc-service
+  namespace: egs-doctalk
+spec:
+  ports:
+  - port: 80
+    targetPort: 3300
+  selector:
+    app: webrtc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: peerjs-service
+  namespace: egs-doctalk
+spec:
+  ports:
+  - port: 80
+    targetPort: 3001
+  selector:
+    app: peerjs
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -137,5 +203,15 @@ spec:
         backend:
           service:
             name: backend-service
+            port: 
+              number: 80
+  - host: app-egs-doctalk-peerjs.deti
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: peerjs-service
             port: 
               number: 80
