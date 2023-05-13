@@ -25,14 +25,20 @@ spec:
         - name: ASPNETCORE_URLS
           value: "http://+:5186"
         - name: DATABASE_CONNECTION_STRING
-          value: "Server=localhost;User=sa;Password=Password1;TrustServerCertificate=True"
+          valueFrom:
+            secretKeyRef:
+              name: egs-doctalk-secrets
+              key: APPOINTMENTS_DATABASE_CONNECTION_STRING
         ports:
         - containerPort: 5186
       - name: appointments-db
         image: mcr.microsoft.com/mssql/server:2022-latest
         env:
         - name: SA_PASSWORD
-          value: "Password1"
+          valueFrom:
+            secretKeyRef:
+              name: egs-doctalk-secrets
+              key: APPOINTMENTS_DATABASE_PASSWORD
         - name: ACCEPT_EULA
           value: "Y"
         - name: MSSQL_PID
@@ -57,7 +63,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: registry.deti:5000/egs-doctalk/backend:v1
+        image: registry.deti:5000/egs-doctalk/backend_service:latest
         env:
         - name: DOTNET_ENVIRONMENT
           value: "Development"
@@ -66,22 +72,83 @@ spec:
         - name: ASPNETCORE_URLS
           value: "http://+:5285"
         - name: DATABASE_CONNECTION_STRING
-          value: "Server=localhost;User=sa;Password=Password1;TrustServerCertificate=True"
+          valueFrom:
+            secretKeyRef:
+              name: egs-doctalk-secrets
+              key: BACKEND_DATABASE_CONNECTION_STRING
         - name: APPOINTMENT_SERVICE_BASE_URL
           value: "http://appointments-service:80/v1"
+        - name: AUTH_SERVICE_BASE_URL
+          value: "http://app-egs-doctalk-auth.deti:80"
+        - name: NOTIFICATION_SERVICE_BASE_URL
+          value: "http://notification-svc:80/v1"
+        - name: WEBRTC_SERVICE_BASE_URL
+          value: "http://webrtc-service:80"
+        - name: FRONTEND_HOME_URL
+          value: "http://app-egs-doctalk-frontend.deti:80"
         ports:
         - containerPort: 5285
       - name: backend-db
         image: mcr.microsoft.com/mssql/server:2022-latest
         env:
         - name: SA_PASSWORD
-          value: "Password1"
+          valueFrom:
+            secretKeyRef:
+              name: egs-doctalk-secrets
+              key: BACKEND_DATABASE_PASSWORD
         - name: ACCEPT_EULA
           value: "Y"
         - name: MSSQL_PID
           value: "Developer"
         ports:
         - containerPort: 1433
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentication-deployment
+  namespace: egs-doctalk
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authentication-api
+  template:
+    metadata:
+      labels:
+        app: authentication-api
+    spec:
+      containers:
+        - name: authentication-svc
+          image: registry.deti:5000/egs-doctalk/egs-authentication-svc:v1
+          ports:
+            - containerPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-deployment
+  namespace: egs-doctalk
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-api
+  template:
+    metadata:
+      labels:
+        app: notification-api
+    spec:
+      containers:
+      - name: notification-api
+        image: registry.deti:5000/egs-doctalk/egs-notification-svc:v1
+        env:
+        - name: BIND_PORT
+          value: '3030'
+        - name: BIND_ADDR
+          value: '0.0.0.0'
+        ports:
+        - containerPort: 3030
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -173,6 +240,34 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: authentication-svc
+  namespace: egs-doctalk
+spec:
+  selector:
+    app: authentication-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-svc
+  namespace: egs-doctalk
+spec:
+  selector:
+    app: notification-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3030
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: webrtc-service
   namespace: egs-doctalk
 spec:
@@ -209,7 +304,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: appointments-k3s
+  name: egs-doctalk-ingress-k3s
   namespace: egs-doctalk
   annotations:
     kubernetes.io/ingress.class: traefik
@@ -218,16 +313,6 @@ metadata:
     traefik.ingress.kubernetes.io/redirect-permanent: "true"
 spec:
   rules:
-  # - host: app-egs-doctalk-appointments.deti
-  #   http:
-  #     paths:
-  #     - path: /
-  #       pathType: Prefix
-  #       backend:
-  #         service:
-  #           name: appointments-service
-  #           port: 
-  #             number: 80
   - host: app-egs-doctalk-backend.deti
     http:
       paths:
@@ -236,6 +321,16 @@ spec:
         backend:
           service:
             name: backend-service
+            port: 
+              number: 80
+  - host: app-egs-doctalk-auth.deti
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: authentication-svc
             port: 
               number: 80
   - host: app-egs-doctalk-peerjs.deti
