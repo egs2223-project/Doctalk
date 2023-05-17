@@ -45,7 +45,7 @@ services:
       - DATABASE_CONNECTION_STRING=Server=backend-db;User=sa;Password=Password1;TrustServerCertificate=True
       - APPOINTMENT_SERVICE_BASE_URL=http://appointment_service:5186/v1
       - NOTIFICATION_SERVICE_BASE_URL=http://10.0.4.3:3030/v1
-      - AUTH_SERVICE_BASE_URL=http://localhost:5000
+      - AUTH_SERVICE_BASE_URL=http://localhost:5800
       - WEBRTC_SERVICE_BASE_URL=http://10.0.5.3:3300
     ports:
       - "7000:7000"
@@ -94,7 +94,7 @@ services:
     build:
       dockerfile: authentication-service/Dockerfile.auth
     ports:
-      - "5000:5000"
+      - "5800:5800"
     networks:
       default:
   frontend:
