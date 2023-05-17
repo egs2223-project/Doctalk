@@ -122,7 +122,7 @@ spec:
         - name: authentication-svc
           image: registry.deti:5000/egs-doctalk/egs-authentication-svc:v1
           ports:
-            - containerPort: 5000
+            - containerPort: 5800
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -248,7 +248,7 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 5000
+      targetPort: 5800
   type: ClusterIP
 ---
 apiVersion: v1
