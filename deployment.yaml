@@ -16,7 +16,8 @@ spec:
     spec:
       containers:
       - name: appointments
-        image: registry.deti:5000/egs-doctalk/appointment_service:v1
+        image: docker.io/vdfijhnf8yerf87hgti/egs-doctalk-appoint:latest
+        imagePullPolicy: Always
         env:
         - name: DOTNET_ENVIRONMENT
           value: "Development"
@@ -63,7 +64,8 @@ spec:
     spec:
       containers:
       - name: backend
-        image: registry.deti:5000/egs-doctalk/backend_service:latest
+        image: docker.io/vdfijhnf8yerf87hgti/egs-doctalk-backend:latest
+        imagePullPolicy: Always
         env:
         - name: DOTNET_ENVIRONMENT
           value: "Development"
@@ -79,13 +81,13 @@ spec:
         - name: APPOINTMENT_SERVICE_BASE_URL
           value: "http://appointments-service:80/v1"
         - name: AUTH_SERVICE_BASE_URL
-          value: "http://app-egs-doctalk-auth.deti:80"
+          value: "https://app-egs-doctalk.duckdns.org"
         - name: NOTIFICATION_SERVICE_BASE_URL
           value: "http://notification-svc:80/v1"
         - name: WEBRTC_SERVICE_BASE_URL
           value: "http://webrtc-service:80"
         - name: FRONTEND_HOME_URL
-          value: "http://app-egs-doctalk-frontend.deti:80"
+          value: "http://frontend.egs-doctalk.deti"
         ports:
         - containerPort: 5285
       - name: backend-db
@@ -120,9 +122,15 @@ spec:
     spec:
       containers:
         - name: authentication-svc
-          image: registry.deti:5000/egs-doctalk/egs-authentication-svc:v1
+          image: docker.io/vdfijhnf8yerf87hgti/egs-doctalk-auth:latest
+          imagePullPolicy: Always
+          env:
+          - name: REDIRECT_URL
+            value: "https://app-egs-doctalk.duckdns.org"
+          - name: PORT
+            value: "5800"
           ports:
-            - containerPort: 5000
+            - containerPort: 5800
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -141,7 +149,8 @@ spec:
     spec:
       containers:
       - name: notification-api
-        image: registry.deti:5000/egs-doctalk/egs-notification-svc:v1
+        image: docker.io/vdfijhnf8yerf87hgti/egs-doctalk-notif:latest
+        imagePullPolicy: Always
         env:
         - name: BIND_PORT
           value: '3030'
@@ -167,7 +176,8 @@ spec:
     spec:
       containers:
       - name: webrtc
-        image: registry.deti:5000/egs-doctalk/webrtc:v1
+        image: docker.io/vdfijhnf8yerf87hgti/egs-doctalk-webrtc:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 3300
 ---
@@ -188,7 +198,8 @@ spec:
     spec:
       containers:
       - name: peerjs
-        image: registry.deti:5000/egs-doctalk/peerjs:v1
+        image: docker.io/vdfijhnf8yerf87hgti/egs-doctalk-peerjs:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 3001
 ---
@@ -209,7 +220,8 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: registry.deti:5000/egs-doctalk/frontend:v1
+        image: docker.io/vdfijhnf8yerf87hgti/egs-doctalk-frontend:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 3000
 ---
@@ -248,7 +260,7 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 5000
+      targetPort: 5800
   type: ClusterIP
 ---
 apiVersion: v1
@@ -313,7 +325,7 @@ metadata:
     traefik.ingress.kubernetes.io/redirect-permanent: "true"
 spec:
   rules:
-  - host: app-egs-doctalk-backend.deti
+  - host: backend.egs-doctalk.deti
     http:
       paths:
       - path: /
@@ -323,7 +335,7 @@ spec:
             name: backend-service
             port: 
               number: 80
-  - host: app-egs-doctalk-auth.deti
+  - host: app-egs-doctalk.duckdns.org
     http:
       paths:
       - path: /
@@ -333,7 +345,7 @@ spec:
             name: authentication-svc
             port: 
               number: 80
-  - host: app-egs-doctalk-peerjs.deti
+  - host: peerjs.egs-doctalk.deti
     http:
       paths:
       - path: /
@@ -343,7 +355,7 @@ spec:
             name: peerjs-service
             port: 
               number: 80
-  - host: app-egs-doctalk-frontend.deti
+  - host: frontend.egs-doctalk.deti
     http:
       paths:
       - path: /
@@ -351,5 +363,15 @@ spec:
         backend:
           service:
             name: frontend-service
+            port: 
+              number: 80
+  - host: webrtc.egs-doctalk.deti
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: webrtc-service
             port: 
               number: 80
