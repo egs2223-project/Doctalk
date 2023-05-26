@@ -35,6 +35,45 @@ spec:
         emptyDir: {}
 ---
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-configmap
+  namespace: egs-doctalk
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['app-egs-doctalk-prometheus.deti:80']
+        metrics_path: /metrics
+
+      - job_name: 'Frontend'
+        static_configs:
+          - targets: ['frontend.egs-doctalk.deti:80']
+        metrics_path: /metrics
+      - job_name: 'Backend'
+        static_configs:
+          - targets: ['backend.egs-doctalk.deti:80']
+        metrics_path: /metrics
+      - job_name: 'Authentication'
+        static_configs:
+          - targets: ['app-egs-doctalk.duckdns.org:80']
+        metrics_path: /metrics
+      - job_name: 'PeerJS' 
+        static_configs:
+          - targets: ['peerjs.egs-doctalk.deti:80']
+        metrics_path: /metrics
+      - job_name: 'WebRTC'
+        static_configs:
+          - targets: ['webrtc.egs-doctalk.deti:80']
+        metrics_path: /metrics
+
+
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: egs-prometheus-service
@@ -47,6 +86,7 @@ spec:
       port: 80
       targetPort: 9090
 ---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -99,6 +139,7 @@ metadata:
     traefik.ingress.kubernetes.io/frontend-entry-points: http,https
     traefik.ingress.kubernetes.io/redirect-entry-point: https
     traefik.ingress.kubernetes.io/redirect-permanent: "true"
+    traefik.ingress.kubernetes.io/force-https: "true"
 spec:
   rules:
   - host: app-egs-doctalk-prometheus.deti
