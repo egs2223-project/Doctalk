@@ -87,7 +87,7 @@ spec:
         - name: WEBRTC_SERVICE_BASE_URL
           value: "http://webrtc-service:80"
         - name: FRONTEND_HOME_URL
-          value: "http://frontend.egs-doctalk.deti"
+          value: "https://app-egs-doctalk.duckdns.org"
         ports:
         - containerPort: 5285
       - name: backend-db
@@ -125,12 +125,14 @@ spec:
           image: docker.io/vdfijhnf8yerf87hgti/egs-doctalk-auth:latest
           imagePullPolicy: Always
           env:
-          - name: REDIRECT_URL
-            value: "https://app-egs-doctalk.duckdns.org"
           - name: PORT
             value: "5800"
           ports:
             - containerPort: 5800
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -158,6 +160,10 @@ spec:
           value: '0.0.0.0'
         ports:
         - containerPort: 3030
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -325,39 +331,30 @@ metadata:
     traefik.ingress.kubernetes.io/redirect-permanent: "true"
 spec:
   rules:
-  - host: backend.egs-doctalk.deti
+  - host: app-egs-doctalk.duckdns.org
     http:
       paths:
-      - path: /
+      - path: /v1
         pathType: Prefix
         backend:
           service:
             name: backend-service
             port: 
               number: 80
-  - host: app-egs-doctalk.duckdns.org
-    http:
-      paths:
-      - path: /
+      - path: /login
         pathType: Prefix
         backend:
           service:
             name: authentication-svc
             port: 
               number: 80
-  - host: peerjs.egs-doctalk.deti
-    http:
-      paths:
-      - path: /
+      - path: /auth
         pathType: Prefix
         backend:
           service:
-            name: peerjs-service
+            name: authentication-svc
             port: 
               number: 80
-  - host: frontend.egs-doctalk.deti
-    http:
-      paths:
       - path: /
         pathType: Prefix
         backend:
@@ -365,10 +362,14 @@ spec:
             name: frontend-service
             port: 
               number: 80
-  - host: webrtc.egs-doctalk.deti
-    http:
-      paths:
-      - path: /
+      - path: /peerjs
+        pathType: Prefix
+        backend:
+          service:
+            name: peerjs-service
+            port: 
+              number: 80
+      - path: /socket.io
         pathType: Prefix
         backend:
           service:
