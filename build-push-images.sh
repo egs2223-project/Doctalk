@@ -4,7 +4,7 @@ docker buildx build --platform linux/amd64 --network=host -t vdfijhnf8yerf87hgti
 
 docker buildx build --platform linux/amd64 --network=host -t vdfijhnf8yerf87hgti/egs-doctalk-notif:latest -f notification-service/Dockerfile.notify .
 
-docker buildx build --platform linux/amd64 --network=host -t vdfijhnf8yerf87hgti/egs-doctalk-frontend:latest -f frontend/Dockerfile .
+docker buildx build --platform linux/amd64 --network=host -t vdfijhnf8yerf87hgti/egs-doctalk-frontend:latest -f frontend-k3s/Dockerfile .
 
 docker buildx build --platform linux/amd64 --network=host -t vdfijhnf8yerf87hgti/egs-doctalk-peerjs:latest -f peerJS/Dockerfile .
 

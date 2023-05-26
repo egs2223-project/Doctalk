@@ -16,3 +16,7 @@
 [submodule "notification-service"]
 	path = notification-service
 	url = git@github.com:egs2223-project/notification-service.git
+[submodule "frontend-k3s"]
+	path = frontend-k3s
+	url = git@github.com:egs2223-project/frontend.git
+	branch = k3s
