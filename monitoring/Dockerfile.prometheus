@@ -1,0 +1,23 @@
+# Use the latest Alpine base image
+FROM alpine:latest
+
+# Set the working directory to /prometheus
+WORKDIR /prometheus
+
+# Install necessary dependencies
+RUN apk add --no-cache curl
+
+# Download Prometheus
+ARG PROM_VERSION=2.30.3
+RUN curl -LO "https://github.com/prometheus/prometheus/releases/download/v${PROM_VERSION}/prometheus-${PROM_VERSION}.linux-amd64.tar.gz" && \
+    tar -xvzf "prometheus-${PROM_VERSION}.linux-amd64.tar.gz" && \
+    mv "prometheus-${PROM_VERSION}.linux-amd64"/* .
+
+# Copy the Prometheus configuration file
+COPY prometheus.yml /prometheus/prometheus.yml
+
+# Expose the Prometheus port
+EXPOSE 9090
+
+# Set the command to start Prometheus
+CMD [ "./prometheus" ]

@@ -1,0 +1,14 @@
+# Base image
+FROM grafana/grafana:latest
+
+# Set the working directory to the Grafana configuration directory
+WORKDIR /etc/grafana
+
+# Copy the custom configuration file
+COPY custom.ini ./custom.ini
+
+# Expose Grafana port
+EXPOSE 3000
+
+# Start Grafana server
+CMD ["grafana-server", "--config", "/etc/grafana/custom.ini"]

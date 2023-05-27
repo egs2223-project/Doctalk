@@ -52,23 +52,23 @@ data:
 
       - job_name: 'Frontend'
         static_configs:
-          - targets: ['frontend.egs-doctalk.deti:80']
+          - targets: ['frontend-service:80']
         metrics_path: /metrics
       - job_name: 'Backend'
         static_configs:
-          - targets: ['backend.egs-doctalk.deti:80']
+          - targets: ['backend-service:80']
         metrics_path: /metrics
-      - job_name: 'Authentication'
+      - job_name: 'authentication'
         static_configs:
-          - targets: ['app-egs-doctalk.duckdns.org:80']
+          - targets: ['authentication-svc:80']
         metrics_path: /metrics
       - job_name: 'PeerJS' 
         static_configs:
-          - targets: ['peerjs.egs-doctalk.deti:80']
+          - targets: ['peerjs-service:80']
         metrics_path: /metrics
       - job_name: 'WebRTC'
         static_configs:
-          - targets: ['webrtc.egs-doctalk.deti:80']
+          - targets: ['webrtc-service:80']
         metrics_path: /metrics
 
 

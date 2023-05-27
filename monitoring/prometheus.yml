@@ -1,0 +1,34 @@
+# prometheus.yml
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    metrics_path: /metrics
+
+  - job_name: 'frontend'
+    static_configs:
+      - targets: ['doctalk-frontend-1:3000']
+    metrics_path: /metrics
+  - job_name: 'backend'
+    static_configs:
+      - targets: ['doctalk-backend-1:7000']
+    metrics_path: /metrics
+  - job_name: 'authentication'
+    static_configs:
+      - targets: ['doctalk-authentication_service-1:5800']
+    metrics_path: /metrics
+  - job_name: 'notification'
+    static_configs:
+      - targets: ['doctalk-notification_service-1:3030']
+    metrics_path: /metrics
+  - job_name: 'peerjs' 
+    static_configs:
+      - targets: ['doctalk-peerjs-1:3001']
+    metrics_path: /metrics
+  - job_name: 'webrtc'
+    static_configs:
+      - targets: ['doctalk-webrtc-1:3300']
+    metrics_path: /metrics
