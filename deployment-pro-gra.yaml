@@ -4,7 +4,7 @@ metadata:
   name: egs-prometheus-deployment
   namespace: egs-doctalk
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: egs-prometheus
@@ -93,7 +93,7 @@ metadata:
   name: egs-grafana-deployment
   namespace: egs-doctalk
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: egs-grafana
