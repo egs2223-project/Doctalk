@@ -123,26 +123,6 @@ services:
       - "3001:3001" 
     networks:
       default:
-  prometheus:
-    restart: on-failure
-    build:
-      context: ./monitoring
-      dockerfile: Dockerfile.prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./monitoring/prometheus.yml:/prometheus/prometheus.yml
-    networks:
-      default:
-  grafana:
-    restart: on-failure
-    build:
-      context: ./monitoring
-      dockerfile: Dockerfile.grafana
-    ports:
-      - "3002:3000"
-    networks:
-      default:
 networks:
   appointment-db-internal:
     internal: true

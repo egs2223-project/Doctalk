@@ -1,9 +1,9 @@
 [submodule "EGS-Backend"]
 	path = EGS-Backend
-	url = git@github.com:Immodicus/EGS-Backend.git
+	url = git@github.com:egs2223-project/EGS-Backend.git
 [submodule "AppointmentService"]
 	path = AppointmentService
-	url = git@github.com:Immodicus/AppointmentService.git
+	url = git@github.com:egs2223-project/AppointmentService.git
 [submodule "frontend"]
 	path = frontend
 	url = git@github.com:egs2223-project/frontend.git
